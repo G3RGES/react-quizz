@@ -39,6 +39,19 @@ function reducer(state, action) {
         ...state,
         status: "active",
       };
+
+    case "ANSWER_QUESTION":
+      const question = state.questions[state.index];
+
+      return {
+        ...state,
+        answer: action.payload,
+        points:
+          action.payload === question.correctOption
+            ? state.points + question.points
+            : state.points,
+      };
+
     default:
       throw new Error(`Unknown action type: ${action.type}`);
   }
@@ -82,7 +95,14 @@ function App() {
         {status === "ready" && (
           <StartScreen numQuestions={numQuestions} onStart={handleStartQuiz} />
         )}
-        {status === "active" && <Question question={questions[index]} />}
+        {status === "active" && (
+          <Question
+            question={questions[index]}
+            dispatch={dispatch}
+            answer={answer}
+            points={points}
+          />
+        )}
       </Main>
     </div>
   );
