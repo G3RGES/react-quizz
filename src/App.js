@@ -1,8 +1,10 @@
 import { useEffect, useReducer } from "react";
-import Header from "./Header";
-import Main from "./Main";
-import Loader from "./Loader";
-import Error from "./Error";
+import Header from "./components/Header";
+import Main from "./components/Main";
+import Loader from "./components/Loader";
+import Error from "./components/Error";
+import StartScreen from "./components/StartScreen";
+import Question from "./components/Question";
 
 // import DateCounter from "./DateCounter";
 
@@ -10,6 +12,10 @@ const initialState = {
   questions: [],
   status: "loading",
   error: null,
+  index: 0,
+  answer: null,
+  points: 0,
+  highscore: 0,
 };
 
 function reducer(state, action) {
@@ -27,6 +33,12 @@ function reducer(state, action) {
         status: "error",
         error: action.payload,
       };
+
+    case "START_QUIZ":
+      return {
+        ...state,
+        status: "active",
+      };
     default:
       throw new Error(`Unknown action type: ${action.type}`);
   }
@@ -36,7 +48,9 @@ function App() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { questions, status, error } = state;
+  const { questions, status, error, index, answer, points, highscore } = state;
+
+  const numQuestions = questions.length;
 
   useEffect(function () {
     fetch("http://localhost:4000/questions")
@@ -50,6 +64,12 @@ function App() {
 
   // console.log(questions);
 
+  function handleStartQuiz() {
+    dispatch({ type: "START_QUIZ" });
+  }
+
+  console.log(status);
+
   return (
     <div className="app">
       {/* <h1>Hello, World!</h1> */}
@@ -60,12 +80,9 @@ function App() {
         {status === "loading" && <Loader />}
         {status === "error" && <Error message={error} />}
         {status === "ready" && (
-          <ul>
-            {questions.map((question) => (
-              <li key={question.id}>{question.question}</li>
-            ))}
-          </ul>
+          <StartScreen numQuestions={numQuestions} onStart={handleStartQuiz} />
         )}
+        {status === "active" && <Question question={questions[index]} />}
       </Main>
     </div>
   );
