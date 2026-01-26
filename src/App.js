@@ -5,6 +5,8 @@ import Loader from "./components/Loader";
 import Error from "./components/Error";
 import StartScreen from "./components/StartScreen";
 import Question from "./components/Question";
+import NextButton from "./components/NextButton";
+import Progress from "./components/Progress";
 
 // import DateCounter from "./DateCounter";
 
@@ -15,7 +17,6 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
-  highscore: 0,
 };
 
 function reducer(state, action) {
@@ -52,6 +53,13 @@ function reducer(state, action) {
             : state.points,
       };
 
+    case "NEXT_QUESTION":
+      return {
+        ...state,
+        index: state.index + 1,
+        answer: null,
+      };
+
     default:
       throw new Error(`Unknown action type: ${action.type}`);
   }
@@ -61,9 +69,10 @@ function App() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { questions, status, error, index, answer, points, highscore } = state;
+  const { questions, status, error, index, answer, points } = state;
 
   const numQuestions = questions.length;
+  const highscore = questions.reduce((sum, q) => sum + q.points, 0);
 
   useEffect(function () {
     fetch("http://localhost:4000/questions")
@@ -96,12 +105,22 @@ function App() {
           <StartScreen numQuestions={numQuestions} onStart={handleStartQuiz} />
         )}
         {status === "active" && (
-          <Question
-            question={questions[index]}
-            dispatch={dispatch}
-            answer={answer}
-            points={points}
-          />
+          <>
+            <Progress
+              index={index}
+              numQuestions={numQuestions}
+              points={points}
+              highscore={highscore}
+              answer={answer}
+            />
+            <Question
+              question={questions[index]}
+              dispatch={dispatch}
+              answer={answer}
+              points={points}
+            />
+            <NextButton dispatch={dispatch} answer={answer} />
+          </>
         )}
       </Main>
     </div>
