@@ -19,6 +19,7 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
+  highestscore: 0,
 };
 
 function reducer(state, action) {
@@ -67,6 +68,8 @@ function reducer(state, action) {
         ...state,
         status: "finished",
         answer: null,
+        highestscore:
+          state.points > state.highestscore ? state.points : state.highestscore,
       };
     case "RESET":
       return initialState;
@@ -80,7 +83,8 @@ function App() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { questions, status, error, index, answer, points } = state;
+  const { questions, status, error, index, answer, points, highestscore } =
+    state;
 
   const numQuestions = questions.length;
   const highscore = questions.reduce((sum, q) => sum + q.points, 0);
@@ -144,7 +148,11 @@ function App() {
         )}
 
         {status === "finished" && (
-          <FinishScreen points={points} highscore={highscore} />
+          <FinishScreen
+            points={points}
+            highscore={highscore}
+            highestscore={highestscore}
+          />
         )}
       </Main>
     </div>
