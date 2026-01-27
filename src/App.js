@@ -7,6 +7,8 @@ import StartScreen from "./components/StartScreen";
 import Question from "./components/Question";
 import NextButton from "./components/NextButton";
 import Progress from "./components/Progress";
+import FinishScreen from "./components/FinishScreen";
+import FinishButton from "./components/FinishButton";
 
 // import DateCounter from "./DateCounter";
 
@@ -60,6 +62,15 @@ function reducer(state, action) {
         answer: null,
       };
 
+    case "FINISH_QUIZ":
+      return {
+        ...state,
+        status: "finished",
+        answer: null,
+      };
+    case "RESET":
+      return initialState;
+
     default:
       throw new Error(`Unknown action type: ${action.type}`);
   }
@@ -73,6 +84,7 @@ function App() {
 
   const numQuestions = questions.length;
   const highscore = questions.reduce((sum, q) => sum + q.points, 0);
+  const lastQuestion = index === numQuestions - 1;
 
   useEffect(function () {
     fetch("http://localhost:4000/questions")
@@ -119,8 +131,20 @@ function App() {
               answer={answer}
               points={points}
             />
-            <NextButton dispatch={dispatch} answer={answer} />
+            {lastQuestion ? (
+              <FinishButton
+                points={points}
+                highscore={highscore}
+                dispatch={dispatch}
+              />
+            ) : (
+              <NextButton dispatch={dispatch} answer={answer} />
+            )}
           </>
+        )}
+
+        {status === "finished" && (
+          <FinishScreen points={points} highscore={highscore} />
         )}
       </Main>
     </div>
